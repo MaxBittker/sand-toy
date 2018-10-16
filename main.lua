@@ -1,8 +1,17 @@
 -- Example: Mouse callbacks
-width = love.graphics.getWidth()
 
-function love.load()
-	love.graphics.setFont(love.graphics.newFont(11))
+width, height = love.graphics.getDimensions()
+cell_size = 3
+width_cells = math.floor(width / cell_size)
+height_cells = math.floor(height / cell_size)
+particles = {}
+cells = {} -- create the matrix
+
+for i = 1, width_cells do
+	cells[i] = {} -- create a new row
+	for j = 1, height_cells do
+		cells[i][j] = nil
+	end
 end
 
 -- Mousepressed: Called whenever a mouse button was pressed,
@@ -48,25 +57,59 @@ function love.load()
 	last = "none"
 	lastw = "none"
 end
+function math.clamp(val, lower, upper)
+	assert(val and lower and upper, "not very useful error message here")
+	if lower > upper then
+		lower, upper = upper, lower
+	end -- swap if boundaries supplied the wrong way
+	return math.max(lower, math.min(upper, val))
+end
+function make_particle()
+	p = {
+		x = math.random(1, width_cells - 1),
+		y = math.random(1, height_cells - 1),
+		color = {
+			math.random(50, 200),
+			math.random(50, 200),
+			math.random(50, 200),
+			255
+		}
+	}
+	if (cells[p.x][p.y] == nil) then
+		table.insert(particles, p)
+		cells[p.x][p.y] = p
+	end
+end
 
--- Output the last mouse button which was pressed/released.
+function updateDust(p)
+	newx = math.clamp(p.x + math.random(-1, 1), 1, width_cells - 1)
+	newy = math.clamp(p.y + math.random(-0, 1), 1, height_cells - 1)
+	-- print(newx, newy)
+	if (cells[newx][newy] == nil) then
+		cells[p.x][p.y] = nil
+		p.x = newx
+		p.y = newy
+		cells[p.x][p.y] = p
+	end
+end
+-- function update
+function love.update()
+	for i, p in ipairs(particles) do
+		updateDust(p)
+	end
+end
 function love.draw()
-	width = love.graphics.getWidth()
-	cell_size = 5
-	width_cells = width / cell_size
-	for i = 1, width_cells * 500 do
-		love.graphics.setColor(math.random(0, 100), math.random(0, 100), math.random(0, 100), 255)
-		love.graphics.rectangle(
-			"fill",
-			(i % width_cells) * cell_size,
-			(math.floor(i / width_cells) + math.random(0, 10)) * cell_size,
-			cell_size,
-			cell_size
-		)
+	for i, p in ipairs(particles) do
+		love.graphics.setColor(p.color)
+		love.graphics.rectangle("fill", p.x * cell_size, p.y * cell_size, cell_size, cell_size)
 	end
 	-- love.graphics.print("Last mouse click: " .. last, 100, 75)
 	-- love.graphics.print("Last wheel move: " .. lastw, 100, 100)
 	love.graphics.setColor(255, 255, 255, 255)
 
-	love.graphics.print("Current FPS: " .. tostring(love.timer.getFPS()), 10, 10)
+	love.graphics.print("Current FPS: " .. tostring(love.timer.getFPS() .. " GC: " .. gcinfo()), 10, 10)
+end
+
+for i = 0, 40000 do
+	make_particle()
 end
