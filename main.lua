@@ -102,6 +102,9 @@ function love.draw()
 	for i, p in ipairs(particles) do
 		love.graphics.setColor(p.color)
 		love.graphics.rectangle("fill", p.x * cell_size, p.y * cell_size, cell_size, cell_size)
+		-- if (i > 1000) then
+		-- break
+		-- end
 	end
 	-- love.graphics.print("Last mouse click: " .. last, 100, 75)
 	-- love.graphics.print("Last wheel move: " .. lastw, 100, 100)
@@ -110,6 +113,6 @@ function love.draw()
 	love.graphics.print("Current FPS: " .. tostring(love.timer.getFPS() .. " GC: " .. gcinfo()), 10, 10)
 end
 
-for i = 0, 40000 do
+for i = 0, 10000 do
 	make_particle()
 end
