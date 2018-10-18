@@ -1,6 +1,7 @@
--- Example: Mouse callbacks
-
 Engine = require("engine")
+
+love.graphics.setDefaultFilter("nearest")
+
 function dump(o)
 	if type(o) == "table" then
 		local s = "{ "
@@ -48,6 +49,10 @@ end
 function love.load()
 	last = "none"
 	lastw = "none"
+	myShader = love.graphics.newShader("shader.fs")
+
+	-- myShader:send("width_cells", width_cells)
+	-- myShader:send("height_cells", height_cells)
 end
 -- function update
 
@@ -63,14 +68,26 @@ function love.update()
 end
 
 function love.draw()
+	love.graphics.setShader(myShader) --draw something here
+	imageData = love.image.newImageData(width_cells, height_cells)
+
 	for x, c in ipairs(cells) do
 		for y, p in ipairs(c) do
+			-- imageData:setPixel(x - 1, y - 1, 0, 0, 0, 255)
+
 			if (p ~= 0) then
-				love.graphics.setColor(p.color)
-				love.graphics.rectangle("fill", x * cell_size, y * cell_size, cell_size, cell_size)
+				imageData:setPixel(x - 1, height_cells - y, p.color[1], p.color[2], p.color[3], 255)
+			-- love.graphics.setColor(p.color)
+			-- love.graphics.rectangle("fill", x * cell_size, y * cell_size, cell_size, cell_size)
 			end
 		end
 	end
+	image = love.graphics.newImage(imageData)
+	myShader:send("tex", image)
 	love.graphics.setColor(255, 255, 255, 255)
+	love.graphics.rectangle("fill", 0, 0, width, height)
+
+	love.graphics.setShader()
+
 	love.graphics.print("Current FPS: " .. tostring(love.timer.getFPS() .. " GC: " .. gcinfo()), 10, 10)
 end

@@ -14,7 +14,6 @@ function dump(o)
 end
 
 width, height = love.graphics.getDimensions()
-
 cell_size = 2
 width_cells = math.floor(width / cell_size)
 height_cells = math.floor(height / cell_size)
@@ -51,7 +50,7 @@ function neighborGetter(pos)
 		local oY = math.clamp(offset.y, -1, 1)
 		local rX = pos.x + oX
 		local rY = pos.y + oY
-		if (rX < 1 or rX > width_cells or rY < 1 or rY > height_cells) then
+		if (rX < 1 or rX >= width_cells + 1 or rY < 1 or rY >= height_cells) then
 			return nil
 		end
 		return cells[rX][rY]
@@ -63,7 +62,7 @@ function neighborSetter(pos)
 		local oY = math.clamp(offset.y, -1, 1)
 		local rX = pos.x + oX
 		local rY = pos.y + oY
-		if (rX < 1 or rX > width_cells or rY < 1 or rY > height_cells) then
+		if (rX < 1 or rX >= width_cells + 1 or rY < 1 or rY >= height_cells) then
 			print("oob set")
 			return nil
 		end
@@ -72,38 +71,39 @@ function neighborSetter(pos)
 	end
 end
 
-function updateDust(p, getNeighbor, setNeighbor)
-	local n = 0
-	for x = -1, 1 do
-		for y = -1, 1 do
-			if (getNeighbor({x = x, y = y}) ~= 0) then
-				n = n + 1
-			end
-		end
-	end
-	-- print(n)
-	if (n < 1) then
-		p.type = 0
-		setNeighbor({x = 0, y = 0}, 0)
-	elseif (n > 2) then
-		setNeighbor({x = 0, y = 0}, 0)
-	else
-		local d = {x = math.random(-1, 1), y = math.random(-1, 1)}
-		setNeighbor(d, p)
-	end
-	-- if (getNeighbor(d) == 0) then
-	-- setNeighbor({x = 0, y = 0}, 0)
-	-- setNeighbor(d, p)
-	-- end
-end
-
 -- function updateDust(p, getNeighbor, setNeighbor)
--- 	local d = {x = math.random(-1, 1), y = math.random(0, 1)}
--- 	if (getNeighbor(d) == 0) then
+-- 	local n = 0
+-- 	for x = -1, 1 do
+-- 		for y = -1, 1 do
+-- 			if (getNeighbor({x = x, y = y}) ~= 0) then
+-- 				n = n + 1
+-- 			end
+-- 		end
+-- 	end
+-- 	-- print(n)
+-- 	if (n < 1) then
+-- 		p.type = 0
 -- 		setNeighbor({x = 0, y = 0}, 0)
+-- 	elseif (n > 2) then
+-- 		setNeighbor({x = 0, y = 0}, 0)
+-- 	else
+-- 		local d = {x = math.random(-1, 1), y = math.random(-1, 1)}
 -- 		setNeighbor(d, p)
 -- 	end
+-- 	-- if (getNeighbor(d) == 0) then
+-- 	-- setNeighbor({x = 0, y = 0}, 0)
+-- 	-- setNeighbor(d, p)
+-- 	-- end
 -- end
+
+function updateDust(p, getNeighbor, setNeighbor)
+	local d = {x = math.random(-1, 1), y = math.random(0, 1)}
+	if (getNeighbor(d) == 0) then
+		setNeighbor({x = 0, y = 0}, 0)
+		setNeighbor(d, p)
+	end
+end
+
 for i = 1, width_cells do
 	cells[i] = {} -- create a new row
 	for j = 1, height_cells do
@@ -111,9 +111,10 @@ for i = 1, width_cells do
 		-- make_particle({x = i, y = j})
 	end
 end
-for i = 0, 10000 do
+
+for i = 0, 30000 do
 	local pos = {
-		x = math.random(1, width_cells - 1),
+		x = math.random(1, width_cells),
 		y = math.random(1, height_cells - 1)
 	}
 	make_particle(pos)
