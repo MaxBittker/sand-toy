@@ -9,6 +9,8 @@ function updateCell(p, getNeighbor, setNeighbor)
         return updateWall(p, getNeighbor, setNeighbor)
     elseif (p.type == 5) then
         return updateClone(p, getNeighbor, setNeighbor)
+    elseif (p.type == 6) then
+        return updateFire(p, getNeighbor, setNeighbor)
     else
         print("unknown type")
     end
@@ -70,6 +72,32 @@ function updateClone(p, getNeighbor, setNeighbor)
     end
     setNeighbor({x = 0, y = 0}, p)
 end
+
+function updateFire(p, getNeighbor, setNeighbor)
+    local d = {x = math.random(-1, 1), y = math.random(-1, 0)}
+
+    for x = -1, 1 do
+        for y = -1, 1 do
+            local nbr = getNeighbor({x = x, y = y})
+            if (nbr == 0) then
+                -- continue;
+            elseif nbr.type == 3 then
+                setNeighbor({x = x, y = y}, {type = 6, rA = 1.0, rB = 0})
+                return
+            elseif nbr.type == 2 then
+                p.rA = 0
+            end
+        end
+    end
+    if (getNeighbor(d) == 0) then
+        setNeighbor({x = 0, y = 0}, 0)
+        p.rA = p.rA - 0.01
+        if (p.rA > 0) then
+            setNeighbor(d, p)
+        end
+    end
+end
+
 function updateLife(p, getNeighbor, setNeighbor)
     local d = {x = 0, y = 0}
     local isAlive = p.rA > 0.5
