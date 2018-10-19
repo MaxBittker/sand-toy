@@ -8,7 +8,7 @@ function updateCell(p, getNeighbor, setNeighbor)
     elseif (p.type == 4) then
         return updateWall(p, getNeighbor, setNeighbor)
     elseif (p.type == 5) then
-        return updateLife(p, getNeighbor, setNeighbor)
+        return updateClone(p, getNeighbor, setNeighbor)
     else
         print("unknown type")
     end
@@ -28,12 +28,15 @@ end
 
 function updateWater(p, getNeighbor, setNeighbor)
     local d = {x = math.random(-1, 1), y = 1}
+    p.rA = math.random() * 0.4 + 0.7
     if (getNeighbor(d) == 0) then
         setNeighbor({x = 0, y = 0}, 0)
         setNeighbor(d, p)
     elseif (getNeighbor({x = d.x, y = 0}) == 0) then
         setNeighbor({x = 0, y = 0}, 0)
         setNeighbor({x = d.x, y = 0}, p)
+    else
+        setNeighbor({x = 0, y = 0}, p)
     end
 end
 
@@ -45,6 +48,28 @@ function updateDust(p, getNeighbor, setNeighbor)
     end
 end
 
+function updateClone(p, getNeighbor, setNeighbor)
+    local d = {x = 0, y = 0}
+    for x = -1, 1 do
+        for y = -1, 1 do
+            local nbr = getNeighbor({x = x, y = y})
+
+            if (p.rB == 0) then
+                if (nbr ~= 0 and nbr.type ~= 5 and p.rB == 0) then
+                    p.rB = nbr.type
+                    p.rA = 1.0
+                    return
+                end
+            else
+                if (nbr == 0) then
+                    setNeighbor({x = x, y = y}, {type = p.rB, rA = 0.5, rB = 0})
+                    break
+                end
+            end
+        end
+    end
+    setNeighbor({x = 0, y = 0}, p)
+end
 function updateLife(p, getNeighbor, setNeighbor)
     local d = {x = 0, y = 0}
     local isAlive = p.rA > 0.5

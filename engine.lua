@@ -83,7 +83,7 @@ for i = 1, width_cells do
 	end
 end
 
-for i = 0, 10000 do
+for i = 0, 100 do
 	local pos = {
 		x = math.random(1, width_cells),
 		y = math.random(1, height_cells - 1)
