@@ -2,6 +2,8 @@ Engine = require("engine")
 
 love.graphics.setDefaultFilter("nearest")
 
+mouse = nil
+currentType = 1
 function dump(o)
 	if type(o) == "table" then
 		local s = "{ "
@@ -28,7 +30,13 @@ function love.mousepressed(x, y, button, istouch)
 		buttonname = "right"
 	end
 
-	last = buttonname .. " pressed @ (" .. x .. "x" .. y .. ")"
+	mouse = {x = math.floor(x / cell_size), y = math.floor(y / cell_size)}
+end
+
+function love.mousemoved(x, y, dx, dy)
+	if mouse ~= nil then
+		mouse = {x = math.floor(x / cell_size), y = math.floor(y / cell_size)}
+	end
 end
 
 -- Mousereleased: Called whenever a mouse button was released,
@@ -36,13 +44,14 @@ end
 function love.mousereleased(x, y, button, istouch)
 	-- Checks which button was pressed.
 	local buttonname = ""
-	if button == 1 then
-		buttonname = "left"
-	elseif button == 2 then
-		buttonname = "right"
-	end
+	mouse = nil
+end
 
-	last = buttonname .. " released @ (" .. x .. "x" .. y .. ")"
+function love.keypressed(key)
+	local n = tonumber(key)
+	if (n ~= nil) then
+		currentType = n
+	end
 end
 
 -- Load a font
@@ -57,34 +66,32 @@ end
 -- function update
 
 function love.update()
+	local n = 5
+	if (mouse ~= nil) then
+		for x = -n, n do
+			for y = -n, n do
+				make_particle({x = mouse.x + x, y = mouse.y + y}, currentType)
+			end
+		end
+	end
 	for x, c in ipairs(cells) do
 		for y, p in ipairs(c) do
 			local pos = {x = x, y = y}
 			if (p ~= 0) then
-				updateDust(p, neighborGetter(pos), neighborSetter(pos))
+				updateCell(p, neighborGetter(pos), neighborSetter(pos))
 			end
 		end
 	end
 end
+imageData = love.image.newImageData(width_cells, height_cells)
 
 function love.draw()
 	love.graphics.setShader(myShader) --draw something here
-	imageData = love.image.newImageData(width_cells, height_cells)
-
-	for x, c in ipairs(cells) do
-		for y, p in ipairs(c) do
-			-- imageData:setPixel(x - 1, y - 1, 0, 0, 0, 255)
-
-			if (p ~= 0) then
-				imageData:setPixel(x - 1, height_cells - y, p.color[1], p.color[2], p.color[3], 255)
-			-- love.graphics.setColor(p.color)
-			-- love.graphics.rectangle("fill", x * cell_size, y * cell_size, cell_size, cell_size)
-			end
-		end
-	end
+	-- imageData = love.image.newImageData(width_cells, height_cells)
 	image = love.graphics.newImage(imageData)
+
 	myShader:send("tex", image)
-	love.graphics.setColor(255, 255, 255, 255)
+	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.rectangle("fill", 0, 0, width, height)
 
 	love.graphics.setShader()

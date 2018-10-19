@@ -1,3 +1,5 @@
+Types = require("types")
+
 function dump(o)
 	if type(o) == "table" then
 		local s = "{ "
@@ -12,12 +14,9 @@ function dump(o)
 		return tostring(o)
 	end
 end
-
-width, height = love.graphics.getDimensions()
-cell_size = 2
-width_cells = math.floor(width / cell_size)
-height_cells = math.floor(height / cell_size)
-cells = {} -- create the matrix
+function add(a, b)
+	return {x = a.x + b.x, y = a.y + b.y}
+end
 
 function math.clamp(val, lower, upper)
 	assert(val and lower and upper, "not very useful error message here")
@@ -27,17 +26,17 @@ function math.clamp(val, lower, upper)
 	return math.max(lower, math.min(upper, val))
 end
 
-function make_particle(pos)
+width, height = love.graphics.getDimensions()
+cell_size = 2
+width_cells = math.floor(width / cell_size)
+height_cells = math.floor(height / cell_size)
+cells = {} -- create the matrix
+
+function make_particle(pos, type)
 	local p = {
-		type = 0,
-		rA = 0,
-		rB = 0,
-		color = {
-			math.random(50, 200),
-			math.random(50, 100),
-			math.random(50, 200),
-			255
-		}
+		type = type,
+		rA = 0.5 + math.random() * 0.1,
+		rB = 0
 	}
 	if (cells[pos.x][pos.y] == 0) then
 		cells[pos.x][pos.y] = p
@@ -68,39 +67,11 @@ function neighborSetter(pos)
 		end
 
 		cells[rX][rY] = v
-	end
-end
-
--- function updateDust(p, getNeighbor, setNeighbor)
--- 	local n = 0
--- 	for x = -1, 1 do
--- 		for y = -1, 1 do
--- 			if (getNeighbor({x = x, y = y}) ~= 0) then
--- 				n = n + 1
--- 			end
--- 		end
--- 	end
--- 	-- print(n)
--- 	if (n < 1) then
--- 		p.type = 0
--- 		setNeighbor({x = 0, y = 0}, 0)
--- 	elseif (n > 2) then
--- 		setNeighbor({x = 0, y = 0}, 0)
--- 	else
--- 		local d = {x = math.random(-1, 1), y = math.random(-1, 1)}
--- 		setNeighbor(d, p)
--- 	end
--- 	-- if (getNeighbor(d) == 0) then
--- 	-- setNeighbor({x = 0, y = 0}, 0)
--- 	-- setNeighbor(d, p)
--- 	-- end
--- end
-
-function updateDust(p, getNeighbor, setNeighbor)
-	local d = {x = math.random(-1, 1), y = math.random(0, 1)}
-	if (getNeighbor(d) == 0) then
-		setNeighbor({x = 0, y = 0}, 0)
-		setNeighbor(d, p)
+		if (v ~= 0) then
+			imageData:setPixel(rX - 1, rY - 1, v.type / 10., v.rA, v.rB, 1)
+		else
+			imageData:setPixel(rX - 1, rY - 1, 0, 0, 0, 1)
+		end
 	end
 end
 
@@ -112,10 +83,10 @@ for i = 1, width_cells do
 	end
 end
 
-for i = 0, 30000 do
+for i = 0, 10000 do
 	local pos = {
 		x = math.random(1, width_cells),
 		y = math.random(1, height_cells - 1)
 	}
-	make_particle(pos)
+	make_particle(pos, 1)
 end
