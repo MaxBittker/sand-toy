@@ -82,7 +82,7 @@ function updateFire(p, getNeighbor, setNeighbor)
     for x = -1, 1 do
         for y = -1, 1 do
             local nbr = getNeighbor({x = x, y = y})
-            if (nbr == 0) then
+            if (nbr == 0 or nbr == nil) then
                 -- continue;
             elseif nbr.type == 3 then
                 setNeighbor({x = x, y = y}, {type = 6, rA = 1.0, rB = 0})
@@ -92,9 +92,10 @@ function updateFire(p, getNeighbor, setNeighbor)
             end
         end
     end
+    p.rA = p.rA - 0.01
+
     if (getNeighbor(d) == 0) then
         setNeighbor({x = 0, y = 0}, 0)
-        p.rA = p.rA - 0.01
         if (p.rA > 0) then
             setNeighbor(d, p)
         end
