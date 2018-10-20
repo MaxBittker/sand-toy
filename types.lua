@@ -37,6 +37,9 @@ function updateWater(p, getNeighbor, setNeighbor)
     elseif (getNeighbor({x = d.x, y = 0}) == 0) then
         setNeighbor({x = 0, y = 0}, 0)
         setNeighbor({x = d.x, y = 0}, p)
+    elseif (getNeighbor({x = -d.x, y = 0}) == 0) then
+        setNeighbor({x = 0, y = 0}, 0)
+        setNeighbor({x = -d.x, y = 0}, p)
     else
         setNeighbor({x = 0, y = 0}, p)
     end
