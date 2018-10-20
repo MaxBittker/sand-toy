@@ -92,7 +92,7 @@ function love.draw()
 
 	myShader:send("tex", image)
 	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.rectangle("fill", 0, 0, width, height)
+	love.graphics.rectangle("fill", 0, 0, width * 10, height * 10)
 
 	love.graphics.setShader()
 
